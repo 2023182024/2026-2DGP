@@ -22,25 +22,25 @@ def move_circle(x,y):
     pass
 
 def move_rectangle(x,y):
-    while x < 800:
+    while x < 500:
         clear_canvas()
         x+=5
         print(x, y)
         character.draw(x, y)
         delay(0.01)
-    while y < 600:
+    while y < 400:
         clear_canvas()
         y+=5
         print(x, y) 
         character.draw(x, y)
         delay(0.01)
-    while x > 0:
+    while x > 300:
         clear_canvas()
         x-=5
         print(x, y)
         character.draw(x, y)
         delay(0.01)
-    while y > 0:
+    while y > 200:
         clear_canvas()
         y-=5
         print(x, y)
@@ -49,6 +49,26 @@ def move_rectangle(x,y):
     pass
 
 def move_triangle(x,y):
+    while x < 500:
+        clear_canvas()
+        x+=4
+        print(x, y)
+        character.draw(x, y)
+        delay(0.01)
+    while y < 400:
+        clear_canvas()
+        y+=4
+        x-=2
+        print(x, y)
+        character.draw(x, y)
+        delay(0.01)
+    while x > 300:
+        clear_canvas()
+        x-=2
+        y-=4
+        print(x, y)
+        character.draw(x, y)
+        delay(0.01)
     clear_canvas()
 
 
