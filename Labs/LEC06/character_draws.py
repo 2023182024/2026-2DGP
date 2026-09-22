@@ -17,21 +17,25 @@ def move_rectangle(x,y):
         x+=2
         print(x, y)
         character.draw(x, y)
+        delay(0.01)
     while y < 600:
         clear_canvas()
         y+=2
         print(x, y) 
         character.draw(x, y)
+        delay(0.01)
     while x > 0:
         clear_canvas()
         x-=2
         print(x, y)
         character.draw(x, y)
+        delay(0.01)
     while y > 0:
         clear_canvas()
         y-=2
         print(x, y)
         character.draw(x, y)
+        delay(0.01)
     pass
 
 def move_triangle(x,y):
