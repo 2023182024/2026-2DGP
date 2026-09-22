@@ -78,8 +78,8 @@ def move_triangle(x,y):
 
 
 while True:
-    move_circle(x, y)
-    move_rectangle(x, y)
+#    move_circle(x, y)
+#    move_rectangle(x, y)
     move_triangle(x, y)
     pass
     
