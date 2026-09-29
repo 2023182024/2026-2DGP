@@ -1,4 +1,5 @@
 from pico2d import *
+import math
 open_canvas(800, 600)
 
 x = 300
@@ -78,8 +79,8 @@ def move_triangle(x,y):
 
 
 while True:
-#    move_circle(x, y)
-#    move_rectangle(x, y)
+    move_circle(x, y)
+    move_rectangle(x, y)
     move_triangle(x, y)
     pass
     
