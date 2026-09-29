@@ -7,7 +7,11 @@ y = 200
 
 character = load_image('character.png')
 
-def draw_line(a):
+def draw_line(a,b):
+    start=a
+    end=a+200
+    for a in range(start,end,4):
+        character.draw(a,b)
     pass
 
 def draw_decline(a):
@@ -30,8 +34,10 @@ def move_circle(x,y):
 
 def move_rectangle(x,y):
     x=300,y=200
-    draw_line(x)
-    draw_line(y)
+    draw_line(x,y)
+    draw_line(y,x)
+    draw_decline(x,y)
+    draw_decline(y,x)
     pass
 
 def move_triangle(x,y):
