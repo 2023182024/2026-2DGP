@@ -14,21 +14,24 @@ def draw_character(x, y):
     print(x, y)
     delay(0.05)
 
-def draw_up(x,y):
+def draw_up(y):
     for y in range(200,400,4):
-        draw_character(x,y)
+        draw_character(300,y)
     pass
 
-def draw_rignt(x,y):
-
+def draw_rignt(x):
+    for x in range(300,500,4):
+        draw_character(x,400)
     pass
 
-def draw_down(x,y):
-
+def draw_down(y):
+    for y in range(400,200,-4):
+        draw_character(500,y)
     pass
 
-def draw_left(x,y):
-
+def draw_left(x):
+    for x in range(500,300,-4):
+        draw_character(x,200)
     pass
 
 def move_circle(x,y):
@@ -43,10 +46,10 @@ def move_circle(x,y):
 
 def move_rectangle(x,y):
     print('RECTANGLE')
-    draw_up(x,y)
-    draw_rignt(x,y)
-    draw_down(x,y)
-    draw_left(x,y)
+    draw_up(y)
+    draw_rignt(x)
+    draw_down(y)
+    draw_left(x)
     pass
 
 
