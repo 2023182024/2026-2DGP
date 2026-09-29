@@ -7,6 +7,12 @@ y = 200
 
 character = load_image('character.png')
 
+def draw_line(a):
+    pass
+
+def draw_decline(a):
+    pass
+
 def move_circle(x,y):
     radius = 200
     angle = 0
@@ -23,30 +29,9 @@ def move_circle(x,y):
     pass
 
 def move_rectangle(x,y):
-    while x < 500:
-        clear_canvas()
-        x+=5
-        print(x, y)
-        character.draw(x, y)
-        delay(0.01)
-    while y < 400:
-        clear_canvas()
-        y+=5
-        print(x, y) 
-        character.draw(x, y)
-        delay(0.01)
-    while x > 300:
-        clear_canvas()
-        x-=5
-        print(x, y)
-        character.draw(x, y)
-        delay(0.01)
-    while y > 200:
-        clear_canvas()
-        y-=5
-        print(x, y)
-        character.draw(x, y)
-        delay(0.01)
+    x=300,y=200
+    draw_line(x)
+    draw_line(y)
     pass
 
 def move_triangle(x,y):
