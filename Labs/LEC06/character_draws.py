@@ -12,6 +12,8 @@ def draw_line(a,b):
     end=a+200
     for a in range(start,end,4):
         character.draw(a,b)
+        update_canvas()
+        delay(0.05)
     pass
 
 def draw_decline(a,b):
@@ -19,6 +21,8 @@ def draw_decline(a,b):
     end=a-200
     for a in range(start,end,-4):
         character.draw(a,b)
+        update_canvas()
+        delay(0.05)
     pass
 
 def move_circle(x,y):
@@ -31,13 +35,15 @@ def move_circle(x,y):
         character.draw(x, y)
         angle += 0.1
         print(x,y,angle)
+        update_canvas()
         delay(0.05)
     x=300
     y=200
     pass
 
 def move_rectangle(x,y):
-    x=300,y=200
+    x=300
+    y=200
     draw_line(x,y)
     draw_line(y,x)
     draw_decline(x,y)
@@ -50,6 +56,7 @@ def move_triangle(x,y):
         x+=4
         print(x, y)
         character.draw(x, y)
+        update_canvas()
         delay(0.01)
     while y < 400:
         clear_canvas()
@@ -57,6 +64,7 @@ def move_triangle(x,y):
         x-=2
         print(x, y)
         character.draw(x, y)
+        update_canvas()
         delay(0.01)
     while x > 300:
         clear_canvas()
@@ -64,6 +72,7 @@ def move_triangle(x,y):
         y-=4
         print(x, y)
         character.draw(x, y)
+        update_canvas()
         delay(0.01)
     clear_canvas()
 
