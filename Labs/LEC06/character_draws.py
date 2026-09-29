@@ -54,19 +54,20 @@ def move_rectangle(x,y):
 
 
 def move_triangle(x,y):
-    while x < 500:
-        draw_character(x, y)
-        x+=4
+    print('TRIANGLE')
+    y=100
 
-    while y < 400:
+    for x in range(200,600,8):
         draw_character(x, y)
-        y+=4
-        x-=2
 
-    while x > 300:
+    for y in range(100,500,8):
+        x-=4
         draw_character(x, y)
-        x-=2
-        y-=4
+        
+    for y in range(500,100,-8):
+        x-=4
+        draw_character(x, y)
+
 
     clear_canvas()
 
