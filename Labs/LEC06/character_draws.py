@@ -14,14 +14,21 @@ def draw_character(x, y):
     print(x, y)
     delay(0.05)
 
-def draw_line(a,b):
+def draw_up(x,y):
 
     pass
 
-def draw_decline(a,b):
+def draw_rignt(x,y):
 
     pass
 
+def draw_down(x,y):
+
+    pass
+
+def draw_left(x,y):
+
+    pass
 
 def move_circle(x,y):
     print('CIRCLE')
@@ -34,10 +41,11 @@ def move_circle(x,y):
 
 
 def move_rectangle(x,y):
-    draw_line(x,y)
-    draw_line(y,x)
-    draw_decline(x,y)
-    draw_decline(y,x)
+    print('RECTANGLE')
+    draw_up(x,y)
+    draw_rignt(x,y)
+    draw_down(x,y)
+    draw_left(x,y)
     pass
 
 
