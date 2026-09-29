@@ -14,7 +14,11 @@ def draw_line(a,b):
         character.draw(a,b)
     pass
 
-def draw_decline(a):
+def draw_decline(a,b):
+    start=a
+    end=a-200
+    for a in range(start,end,-4):
+        character.draw(a,b)
     pass
 
 def move_circle(x,y):
