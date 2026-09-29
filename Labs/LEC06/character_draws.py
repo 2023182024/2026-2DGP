@@ -11,8 +11,10 @@ def draw_line(a,b):
     start=a
     end=a+200
     for a in range(start,end,4):
+        clear_canvas()
         character.draw(a,b)
         update_canvas()
+        print(a, b)
         delay(0.05)
     pass
 
@@ -20,26 +22,28 @@ def draw_decline(a,b):
     start=a
     end=a-200
     for a in range(start,end,-4):
+        clear_canvas()
         character.draw(a,b)
         update_canvas()
+        print(a, b)
         delay(0.05)
     pass
 
 def move_circle(x,y):
-    radius = 200
-    angle = 0
-    while angle < 2 * 3.14:
-        clear_canvas()
-        x = 400 + radius * math.cos(angle)
-        y = 300 + radius * math.sin(angle)
-        character.draw(x, y)
-        angle += 0.1
-        print(x,y,angle)
-        update_canvas()
-        delay(0.05)
-    x=300
-    y=200
+    print('CIRCLE')
+    for deg in range(0,360,5):
+        rad=math.radian(deg)
+        x=400+200*math.cos(rad)
+        y-300+200*math.sin(rad)
+        draw_character(x, y)
     pass
+
+def draw_character(x, y):
+    clear_canvas()
+    character.draw(x,y)
+    update_canvas()
+    print(x, y)
+    delay(0.05)
 
 def move_rectangle(x,y):
     x=300
