@@ -15,7 +15,8 @@ def draw_character(x, y):
     delay(0.05)
 
 def draw_up(x,y):
-
+    for y in range(200,400,4):
+        draw_character(x,y)
     pass
 
 def draw_rignt(x,y):
