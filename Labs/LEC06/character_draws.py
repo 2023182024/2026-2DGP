@@ -55,28 +55,19 @@ def move_rectangle(x,y):
 
 def move_triangle(x,y):
     while x < 500:
-        clear_canvas()
+        draw_character(x, y)
         x+=4
-        print(x, y)
-        character.draw(x, y)
-        update_canvas()
-        delay(0.01)
+
     while y < 400:
-        clear_canvas()
+        draw_character(x, y)
         y+=4
         x-=2
-        print(x, y)
-        character.draw(x, y)
-        update_canvas()
-        delay(0.01)
+
     while x > 300:
-        clear_canvas()
+        draw_character(x, y)
         x-=2
         y-=4
-        print(x, y)
-        character.draw(x, y)
-        update_canvas()
-        delay(0.01)
+
     clear_canvas()
 
 
