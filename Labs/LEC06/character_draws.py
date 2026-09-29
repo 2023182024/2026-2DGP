@@ -15,23 +15,23 @@ def draw_character(x, y):
     delay(0.05)
 
 def draw_up(y):
-    for y in range(200,400,4):
-        draw_character(300,y)
+    for y in range(100,500,8):
+        draw_character(200,y)
     pass
 
 def draw_rignt(x):
-    for x in range(300,500,4):
-        draw_character(x,400)
+    for x in range(200,600,8):
+        draw_character(x,500)
     pass
 
 def draw_down(y):
-    for y in range(400,200,-4):
-        draw_character(500,y)
+    for y in range(500,100,-8):
+        draw_character(600,y)
     pass
 
 def draw_left(x):
-    for x in range(500,300,-4):
-        draw_character(x,200)
+    for x in range(600,200,-8):
+        draw_character(x,100)
     pass
 
 def move_circle(x,y):
