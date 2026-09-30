@@ -9,7 +9,7 @@ canvas_width=800
 canvas_height=600
 
 def draw_update(grass):
-    grass.draw(400,100)
+    grass.draw(400,135)
     update_canvas()
     delay(0.5)
 
