@@ -4,9 +4,10 @@ open_canvas()
 
 qiqi= load_image('qiqi_sprite(made_by_gemini)_transparent.png')
 
-frame=0
+
 
 while True:
+
     x=522
     for index in range(20,550,86):
         clear_canvas()
@@ -17,4 +18,16 @@ while True:
         )
         update_canvas()
         delay(1)
+
+    x=402
+    for index in range(15,723, 85):
+        clear_canvas()
+        qiqi.clip_draw(
+            index,x,
+            50,88,
+            400,300
+        )
+        update_canvas()
+        delay(1)
+
     pass
