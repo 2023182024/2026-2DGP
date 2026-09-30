@@ -22,7 +22,7 @@ while True:
                 400,90
             )
             update_canvas()
-            delay(0.5)
+            delay(0.05)
 
 close_canvas()
 
