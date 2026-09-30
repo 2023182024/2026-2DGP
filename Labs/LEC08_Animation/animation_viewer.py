@@ -47,7 +47,7 @@ while True:
             index,x,
             50,130,
             400,310,
-            canvas_width/2,canvas_height/2
+            canvas_width/3,canvas_height/2
         )
         draw_update(grass)
     
