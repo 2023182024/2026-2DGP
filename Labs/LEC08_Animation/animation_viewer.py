@@ -26,7 +26,19 @@ while True:
         clear_canvas()
         qiqi.clip_draw(
             index,x,
-            50,88,
+            70,88,
+            400,300
+        )
+        update_canvas()
+        delay(1)
+
+    print("jumping")
+    x=33
+    for index in range(20,503,120):
+        clear_canvas()
+        qiqi.clip_draw(
+            index,x,
+            50,100,
             400,300
         )
         update_canvas()
