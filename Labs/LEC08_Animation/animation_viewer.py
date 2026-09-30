@@ -12,7 +12,7 @@ def draw_update(grass):
     delay(1)
 
 while True:
-
+    '''
     print("walking")
     x=522
     for index in range(20,376,86):
@@ -45,10 +45,10 @@ while True:
             400,320
         )
         draw_update(grass)
-
+    
     print("attacking")
     x=402
-    for index in range(723,1408, 85):
+    for index in range(723,1339, 85):
         clear_canvas()
         qiqi.clip_draw(
             index,x,
@@ -56,5 +56,15 @@ while True:
             400,300
         )
         draw_update(grass)
-
+    '''
+    print("skill")
+    x=147
+    for index in range(27,1092,120):
+        clear_canvas()
+        qiqi.clip_draw(
+            index,x,
+            64,92,
+            400,300
+        )
+        draw_update(grass)
     pass
