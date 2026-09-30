@@ -5,9 +5,11 @@ open_canvas()
 qiqi= load_image('qiqi_sprite(made_by_gemini)_transparent.png')
 grass= load_image('grass.png')
 
+canvas_width=800
+canvas_height=600
 
 def draw_update(grass):
-    grass.draw(400,230)
+    grass.draw(400,100)
     update_canvas()
     delay(0.5)
 
@@ -20,7 +22,8 @@ while True:
         qiqi.clip_draw(
             index,x,
             52,86,
-            400,300
+            400,300,
+            canvas_width/2,canvas_height/2
         )
         draw_update(grass)
 
@@ -31,7 +34,8 @@ while True:
         qiqi.clip_draw(
             index,x,
             70,88,
-            400,300
+            400,300,
+            canvas_width/2,canvas_height/2
         )
         draw_update(grass)
 
@@ -42,7 +46,8 @@ while True:
         qiqi.clip_draw(
             index,x,
             50,130,
-            400,320
+            400,320,
+            canvas_width/2,canvas_height/2
         )
         draw_update(grass)
     
@@ -53,7 +58,8 @@ while True:
         qiqi.clip_draw(
             index,x,
             70,87,
-            400,300
+            400,300,
+            canvas_width/2,canvas_height/2
         )
         draw_update(grass)
     
@@ -64,7 +70,8 @@ while True:
         qiqi.clip_draw(
             index,x,
             90,92,
-            400,300
+            400,300,
+            canvas_width/2,canvas_height/2
         )
         draw_update(grass)
     pass
