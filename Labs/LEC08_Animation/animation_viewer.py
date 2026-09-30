@@ -42,7 +42,7 @@ while True:
         qiqi.clip_draw(
             index,x,
             50,130,
-            400,300
+            400,320
         )
         draw_update(grass)
 
