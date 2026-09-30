@@ -9,7 +9,7 @@ grass= load_image('grass.png')
 def draw_update(grass):
     grass.draw(400,230)
     update_canvas()
-    delay(1)
+    delay(0.5)
 
 while True:
     
@@ -59,11 +59,11 @@ while True:
     
     print("skill")
     x=147
-    for index in range(25,1092,118):
+    for index in range(20,1092,118):
         clear_canvas()
         qiqi.clip_draw(
             index,x,
-            70,92,
+            90,92,
             400,300
         )
         draw_update(grass)
