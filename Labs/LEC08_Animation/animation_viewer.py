@@ -3,8 +3,13 @@ from pico2d import *
 open_canvas()
 
 qiqi= load_image('qiqi_sprite(made_by_gemini)_transparent.png')
+grass= load_image('grass.png')
 
 
+def draw_update(grass):
+    grass.draw(400,230)
+    update_canvas()
+    delay(1)
 
 while True:
 
@@ -17,8 +22,7 @@ while True:
             52,86,
             400,300
         )
-        update_canvas()
-        delay(1)
+        draw_update(grass)
 
     print("running")
     x=402
@@ -29,8 +33,7 @@ while True:
             70,88,
             400,300
         )
-        update_canvas()
-        delay(1)
+        draw_update(grass)
 
     print("jumping")
     x=10
@@ -41,7 +44,6 @@ while True:
             50,130,
             400,300
         )
-        update_canvas()
-        delay(1)
+        draw_update(grass)
 
     pass
