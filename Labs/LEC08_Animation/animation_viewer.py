@@ -46,4 +46,15 @@ while True:
         )
         draw_update(grass)
 
+    print("attacking")
+    x=402
+    for index in range(723,1408, 85):
+        clear_canvas()
+        qiqi.clip_draw(
+            index,x,
+            70,87,
+            400,300
+        )
+        draw_update(grass)
+
     pass
