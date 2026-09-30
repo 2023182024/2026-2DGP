@@ -33,12 +33,12 @@ while True:
         delay(1)
 
     print("jumping")
-    x=33
+    x=10
     for index in range(20,503,120):
         clear_canvas()
         qiqi.clip_draw(
             index,x,
-            50,100,
+            50,130,
             400,300
         )
         update_canvas()
