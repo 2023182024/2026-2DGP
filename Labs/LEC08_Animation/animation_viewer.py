@@ -2,7 +2,7 @@ from pico2d import *
 
 open_canvas()
 
-qiqi= load_image('qiqi_sprite(made_by_gemini).png')
+qiqi= load_image('qiqi_sprite(made_by_gemini)_transparent.png')
 
 frame=0
 
