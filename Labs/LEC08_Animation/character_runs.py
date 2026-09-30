@@ -10,26 +10,17 @@ character = load_image('animation_sheet.png')
 # fill here
 frame=0
 
-
-
-
-
-def character_print(frame):
-    clear_canvas()
-    update_canvas()
-    frame = (frame + 1) % 8
-    delay(0.05)
-    return frame
-
 while True:
-
+    clear_canvas()
     grass.draw(400,30)
     character.clip_draw(
         frame*100,0,
         100,100,
         400,90
     )
-    frame = character_print(frame)
+    update_canvas()
+    frame = (frame + 1) % 8
+    delay(0.05)
 
 close_canvas()
 
