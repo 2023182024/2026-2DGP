@@ -33,6 +33,7 @@ FRAME_INTERVALS = {
     "roll": 0.07,
     "brake": 0.05,
     "jump": 0.08,
+    "pose_preview": 0.5,
 }
 
 
@@ -83,6 +84,42 @@ FRAME_SEQUENCES = {
     ),
 }
 FRAME_SEQUENCES["jump"] = FRAME_SEQUENCES["roll"]
+
+# 스프라이트 시트에서 조사한 기본 동작 미사용 프레임의 원본 알파 경계.
+UNUSED_FRAME_SEQUENCES = {
+    "R1-extra": (
+        FrameRect(211, 39, 29, 38), FrameRect(240, 39, 29, 38),
+        FrameRect(270, 45, 24, 32), FrameRect(302, 51, 29, 26),
+    ),
+    "R6": (
+        FrameRect(1, 239, 29, 35), FrameRect(36, 239, 30, 35),
+        FrameRect(74, 239, 31, 35), FrameRect(111, 238, 31, 36),
+        FrameRect(149, 239, 30, 35), FrameRect(186, 238, 31, 36),
+    ),
+    "R7": (
+        FrameRect(1, 283, 29, 35), FrameRect(36, 283, 30, 35),
+        FrameRect(72, 286, 39, 31), FrameRect(123, 285, 39, 32),
+        FrameRect(172, 286, 39, 31), FrameRect(218, 285, 38, 32),
+    ),
+    "R8": (
+        FrameRect(1, 326, 24, 45), FrameRect(31, 327, 29, 44),
+        FrameRect(65, 327, 20, 44), FrameRect(90, 327, 25, 43),
+        FrameRect(119, 327, 25, 43), FrameRect(149, 327, 20, 44),
+        FrameRect(184, 341, 40, 28), FrameRect(232, 341, 39, 27),
+    ),
+    "R9": (
+        FrameRect(1, 379, 27, 38), FrameRect(31, 379, 31, 36),
+        FrameRect(64, 379, 31, 36), FrameRect(99, 377, 33, 38),
+        FrameRect(136, 379, 32, 36), FrameRect(176, 379, 33, 36),
+        FrameRect(217, 379, 33, 36), FrameRect(254, 378, 33, 36),
+    ),
+    "R10": (
+        FrameRect(6, 429, 34, 40), FrameRect(49, 426, 34, 43),
+        FrameRect(96, 427, 23, 39), FrameRect(125, 427, 23, 39),
+    ),
+}
+# R10의 미사용 포즈 네 장을 P 키로 순서대로 보여준다.
+FRAME_SEQUENCES["pose_preview"] = UNUSED_FRAME_SEQUENCES["R10"]
 MAX_FRAME_WIDTH = max(
     frame.width
     for sequence in FRAME_SEQUENCES.values()
@@ -133,6 +170,7 @@ held_keys = set()
 horizontal_key_order = []
 pressed_direction_keys = []
 jump_pressed = False
+pose_pressed = False
 
 
 def load_sprite_sheet():
@@ -181,10 +219,11 @@ def clamp_view_position(x, vertical_offset, frame):
     return x, vertical_offset
 
 def handle_events():
-    """종료, 방향키, Shift와 점프 입력의 눌림 상태를 추적한다."""
-    global running, jump_pressed
+    """종료, 방향키, Shift, 점프와 포즈 둘러보기 입력을 추적한다."""
+    global running, jump_pressed, pose_pressed
     pressed_direction_keys.clear()
     jump_pressed = False
+    pose_pressed = False
 
     for event in get_events():
         if event.type == SDL_QUIT:
@@ -193,7 +232,7 @@ def handle_events():
             if event.key == SDLK_ESCAPE:
                 running = False
             elif event.key in (
-                SDLK_LEFT, SDLK_RIGHT, SDLK_LSHIFT, SDLK_RSHIFT, SDLK_SPACE
+                SDLK_LEFT, SDLK_RIGHT, SDLK_LSHIFT, SDLK_RSHIFT, SDLK_SPACE, SDLK_p
             ) and event.key not in held_keys:
                 held_keys.add(event.key)
                 if event.key in (SDLK_LEFT, SDLK_RIGHT):
@@ -201,6 +240,8 @@ def handle_events():
                     pressed_direction_keys.append(event.key)
                 elif event.key == SDLK_SPACE:
                     jump_pressed = True
+                elif event.key == SDLK_p:
+                    pose_pressed = True
         elif event.type == SDL_KEYUP:
             held_keys.discard(event.key)
             if event.key in horizontal_key_order:
@@ -212,7 +253,8 @@ def print_controls():
     """콘솔에 창 크기와 키 조작 방법을 한 번 안내한다."""
     print("Sonic 애니메이션 뷰어 (1200 x 600)")
     print("방향키: 걷기 | 방향키 + Shift: 달리기")
-    print("방향키 + Shift 1초 유지: 구르기 | Space: 점프 | Esc: 종료")
+    print("방향키 + Shift 1초 유지: 구르기 | Space: 점프")
+    print("P: 미사용 포즈 둘러보기 (각 0.5초) | Esc: 종료")
 
 def current_direction():
     """동시에 누른 방향키 중 마지막으로 누른 방향을 반환한다."""
@@ -230,6 +272,7 @@ def main():
     try:
         open_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas_open = True
+        set_background_color(0.82, 0.88, 0.96)
         sprite_sheet = load_sprite_sheet()
         print_controls()
         players = {
@@ -258,6 +301,11 @@ def main():
             ),
             "jump": AnimationPlayer(
                 FRAME_SEQUENCES["jump"], FRAME_INTERVALS["jump"], loop=True
+            ),
+            "pose_preview": AnimationPlayer(
+                FRAME_SEQUENCES["pose_preview"],
+                FRAME_INTERVALS["pose_preview"],
+                loop=False,
             ),
         }
         mode = "idle"
@@ -296,7 +344,10 @@ def main():
             if jump_pressed and mode != "jump":
                 enter_mode("jump")
                 jump_elapsed = 0.0
+            elif pose_pressed and mode not in ("jump", "pose_preview"):
+                enter_mode("pose_preview")
 
+            pose_preview_frame = mode == "pose_preview"
             if mode == "jump":
                 if direction and shift_down:
                     if run_direction != direction:
@@ -317,6 +368,30 @@ def main():
                 if jump_elapsed >= JUMP_DURATION:
                     jump_offset = 0.0
                     mode = "jump_done"
+            elif mode == "pose_preview":
+                current_player = players["pose_preview"]
+                current_player.update(delta_time)
+                if current_player.finished:
+                    if direction and shift_down:
+                        if run_direction != direction:
+                            run_held_time = 0.0
+                        run_direction = direction
+                        if run_held_time >= ROLL_HOLD_SECONDS:
+                            mode = "roll"
+                            players["roll"].reset()
+                        else:
+                            mode = "run"
+                            players["run"].reset()
+                    elif direction:
+                        run_held_time = 0.0
+                        run_direction = 0
+                        mode = "walk"
+                        players["walk"].reset()
+                    else:
+                        run_held_time = 0.0
+                        run_direction = 0
+                        mode = "idle"
+                        players["idle"].reset()
             else:
                 reverse_pressed = any(
                     (key == SDLK_LEFT and direction == -1)
@@ -385,7 +460,7 @@ def main():
                 current_player.frame,
                 x,
                 vertical_offset=jump_offset,
-                facing_left=facing_left,
+                facing_left=facing_left and not pose_preview_frame,
             )
             update_canvas()
             delay(1.0 / TARGET_FPS)
