@@ -272,7 +272,7 @@ def main():
     try:
         open_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas_open = True
-        set_background_color(0.82, 0.88, 0.96)
+
         sprite_sheet = load_sprite_sheet()
         print_controls()
         players = {
