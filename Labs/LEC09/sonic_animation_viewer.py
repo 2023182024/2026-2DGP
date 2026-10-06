@@ -121,6 +121,7 @@ running = True
 held_keys = set()
 horizontal_key_order = []
 pressed_direction_keys = []
+jump_pressed = False
 
 
 def load_sprite_sheet():
@@ -158,9 +159,10 @@ def draw_frame(image, frame, x, vertical_offset=0.0, facing_left=False):
 
 
 def handle_events():
-    """종료 입력과 방향키의 눌림·해제 및 신규 입력을 추적한다."""
-    global running
+    """종료, 방향키, Shift와 점프 입력의 눌림 상태를 추적한다."""
+    global running, jump_pressed
     pressed_direction_keys.clear()
+    jump_pressed = False
 
     for event in get_events():
         if event.type == SDL_QUIT:
@@ -168,12 +170,15 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE:
                 running = False
-            elif event.key in (SDLK_LEFT, SDLK_RIGHT, SDLK_LSHIFT, SDLK_RSHIFT):
-                if event.key not in held_keys:
-                    held_keys.add(event.key)
-                    if event.key in (SDLK_LEFT, SDLK_RIGHT):
-                        horizontal_key_order.append(event.key)
-                        pressed_direction_keys.append(event.key)
+            elif event.key in (
+                SDLK_LEFT, SDLK_RIGHT, SDLK_LSHIFT, SDLK_RSHIFT, SDLK_SPACE
+            ) and event.key not in held_keys:
+                held_keys.add(event.key)
+                if event.key in (SDLK_LEFT, SDLK_RIGHT):
+                    horizontal_key_order.append(event.key)
+                    pressed_direction_keys.append(event.key)
+                elif event.key == SDLK_SPACE:
+                    jump_pressed = True
         elif event.type == SDL_KEYUP:
             held_keys.discard(event.key)
             if event.key in horizontal_key_order:
@@ -200,6 +205,9 @@ def main():
         )
         roll_start_player = None
         brake_player = None
+        jump_player = None
+        jump_elapsed = 0.0
+        jump_offset = 0.0
         brake_old_direction = 0
         brake_target_direction = 0
         mode = "idle"
@@ -220,84 +228,104 @@ def main():
             if direction:
                 facing_left = direction < 0
             shift_down = SDLK_LSHIFT in held_keys or SDLK_RSHIFT in held_keys
-            reverse_pressed = any(
-                (key == SDLK_LEFT and direction == -1)
-                or (key == SDLK_RIGHT and direction == 1)
-                for key in pressed_direction_keys
-            )
-            if (
-                mode == "run"
-                and shift_down
-                and direction == -run_direction
-                and reverse_pressed
-            ):
-                brake_old_direction = run_direction
-                brake_target_direction = direction
-                brake_player = AnimationPlayer(
-                    tuple(reversed(FRAME_SEQUENCES["run"]))
-                    + FRAME_SEQUENCES["run"][:3],
-                    FRAME_INTERVALS["brake"],
-                    loop=False,
+            if jump_pressed and mode != "jump":
+                jump_player = AnimationPlayer(
+                    FRAME_SEQUENCES["jump"], FRAME_INTERVALS["jump"], loop=True
                 )
-                run_held_time = 0.0
-                mode = "brake"
-            if mode == "brake":
-                brake_player.update(delta_time)
-                current_player = brake_player
-                if brake_player.index < len(FRAME_SEQUENCES["run"]):
-                    facing_left = brake_old_direction < 0
-                else:
-                    facing_left = brake_target_direction < 0
-                if brake_player.finished:
-                    mode = "run"
-                    run_direction = brake_target_direction
-                    run_held_time = 0.0
-            elif direction and shift_down:
-                if run_direction != direction:
-                    run_held_time = 0.0
-                    run_direction = direction
-                    mode = "run"
-                if mode not in ("roll_start", "roll"):
-                    run_held_time += delta_time
-                    if run_held_time >= ROLL_HOLD_SECONDS:
-                        mode = "roll_start"
-                        roll_start_player = AnimationPlayer(
-                            FRAME_SEQUENCES["roll_start"],
-                            FRAME_INTERVALS["roll_start"],
-                            loop=False,
-                        )
-                if mode == "roll_start":
-                    roll_start_player.update(delta_time)
-                    current_player = roll_start_player
-                    x += direction * ROLL_SPEED * delta_time
-                    if roll_start_player.finished:
-                        mode = "roll"
-                elif mode == "roll":
-                    roll_player.update(delta_time)
-                    current_player = roll_player
-                    x += direction * ROLL_SPEED * delta_time
-                else:
-                    mode = "run"
-                    run_player.update(delta_time)
-                    current_player = run_player
-                    x += direction * RUN_SPEED * delta_time
-            else:
-                run_held_time = 0.0
-                run_direction = 0
+                jump_elapsed = 0.0
+                mode = "jump"
+            if mode == "jump":
+                jump_player.update(delta_time)
+                jump_elapsed = min(JUMP_DURATION, jump_elapsed + delta_time)
+                jump_progress = jump_elapsed / JUMP_DURATION
+                jump_offset = 4 * JUMP_HEIGHT * jump_progress * (1 - jump_progress)
                 if direction:
-                    mode = "walk"
-                    walk_player.update(delta_time)
-                    current_player = walk_player
-                    x += direction * WALK_SPEED * delta_time
+                    air_speed = RUN_SPEED if shift_down else WALK_SPEED
+                    x += direction * air_speed * delta_time
+                current_player = jump_player
+                if jump_elapsed >= JUMP_DURATION:
+                    jump_offset = 0.0
+                    mode = "jump_done"
+            else:
+                reverse_pressed = any(
+                    (key == SDLK_LEFT and direction == -1)
+                    or (key == SDLK_RIGHT and direction == 1)
+                    for key in pressed_direction_keys
+                )
+                if (
+                    mode == "run"
+                    and shift_down
+                    and direction == -run_direction
+                    and reverse_pressed
+                ):
+                    brake_old_direction = run_direction
+                    brake_target_direction = direction
+                    brake_player = AnimationPlayer(
+                        tuple(reversed(FRAME_SEQUENCES["run"]))
+                        + FRAME_SEQUENCES["run"][:3],
+                        FRAME_INTERVALS["brake"],
+                        loop=False,
+                    )
+                    run_held_time = 0.0
+                    mode = "brake"
+                if mode == "brake":
+                    brake_player.update(delta_time)
+                    current_player = brake_player
+                    if brake_player.index < len(FRAME_SEQUENCES["run"]):
+                        facing_left = brake_old_direction < 0
+                    else:
+                        facing_left = brake_target_direction < 0
+                    if brake_player.finished:
+                        mode = "run"
+                        run_direction = brake_target_direction
+                        run_held_time = 0.0
+                elif direction and shift_down:
+                    if run_direction != direction:
+                        run_held_time = 0.0
+                        run_direction = direction
+                        mode = "run"
+                    if mode not in ("roll_start", "roll"):
+                        run_held_time += delta_time
+                        if run_held_time >= ROLL_HOLD_SECONDS:
+                            mode = "roll_start"
+                            roll_start_player = AnimationPlayer(
+                                FRAME_SEQUENCES["roll_start"],
+                                FRAME_INTERVALS["roll_start"],
+                                loop=False,
+                            )
+                    if mode == "roll_start":
+                        roll_start_player.update(delta_time)
+                        current_player = roll_start_player
+                        x += direction * ROLL_SPEED * delta_time
+                        if roll_start_player.finished:
+                            mode = "roll"
+                    elif mode == "roll":
+                        roll_player.update(delta_time)
+                        current_player = roll_player
+                        x += direction * ROLL_SPEED * delta_time
+                    else:
+                        mode = "run"
+                        run_player.update(delta_time)
+                        current_player = run_player
+                        x += direction * RUN_SPEED * delta_time
                 else:
-                    mode = "idle"
-                    idle_player.update(delta_time)
-                    current_player = idle_player
+                    run_held_time = 0.0
+                    run_direction = 0
+                    if direction:
+                        mode = "walk"
+                        walk_player.update(delta_time)
+                        current_player = walk_player
+                        x += direction * WALK_SPEED * delta_time
+                    else:
+                        mode = "idle"
+                        idle_player.update(delta_time)
+                        current_player = idle_player
             clear_canvas()
             draw_frame(
                 sprite_sheet,
                 current_player.frame,
                 x,
+                vertical_offset=jump_offset,
                 facing_left=facing_left,
             )
             update_canvas()
