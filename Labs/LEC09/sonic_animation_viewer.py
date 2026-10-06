@@ -12,6 +12,7 @@ except ImportError as error:
 CANVAS_WIDTH = 1200
 CANVAS_HEIGHT = 600
 TARGET_FPS = 60
+MAX_FRAME_DELTA = 0.1
 ASSET_PATH = Path(__file__).resolve().with_name("sonic-sprite.png")
 SHEET_WIDTH = 399
 SHEET_HEIGHT = 525
@@ -184,6 +185,17 @@ def handle_events():
             if event.key in horizontal_key_order:
                 horizontal_key_order.remove(event.key)
 
+
+def current_direction():
+    """동시에 누른 방향키 중 마지막으로 누른 방향을 반환한다."""
+    if not horizontal_key_order:
+        return 0
+    return -1 if horizontal_key_order[-1] == SDLK_LEFT else 1
+
+
+def shift_is_held():
+    return SDLK_LSHIFT in held_keys or SDLK_RSHIFT in held_keys
+
 def main():
     global running
     canvas_open = False
@@ -220,6 +232,9 @@ def main():
             ),
         }
         mode = "idle"
+        held_keys.clear()
+        horizontal_key_order.clear()
+        pressed_direction_keys.clear()
         run_held_time = 0.0
         run_direction = 0
         jump_elapsed = 0.0
@@ -240,15 +255,13 @@ def main():
         previous_time = time.perf_counter()
         while running:
             current_time = time.perf_counter()
-            delta_time = current_time - previous_time
+            delta_time = min(MAX_FRAME_DELTA, max(0.0, current_time - previous_time))
             previous_time = current_time
             handle_events()
-            direction = 0
-            if horizontal_key_order:
-                direction = -1 if horizontal_key_order[-1] == SDLK_LEFT else 1
+            direction = current_direction()
             if direction:
                 facing_left = direction < 0
-            shift_down = SDLK_LSHIFT in held_keys or SDLK_RSHIFT in held_keys
+            shift_down = shift_is_held()
             jump_offset = 0.0
 
             if jump_pressed and mode != "jump":
