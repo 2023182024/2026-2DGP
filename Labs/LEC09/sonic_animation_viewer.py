@@ -118,6 +118,7 @@ class AnimationPlayer:
                 return
 
 running = True
+held_keys = set()
 
 
 def load_sprite_sheet():
@@ -153,15 +154,19 @@ def draw_frame(image, frame, x, vertical_offset=0.0):
 
 
 def handle_events():
-    """창 닫기와 Esc 종료 입력을 처리한다."""
+    """창 닫기, 종료 키와 좌우 방향키 상태를 처리한다."""
     global running
 
     for event in get_events():
         if event.type == SDL_QUIT:
             running = False
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            running = False
-
+        elif event.type == SDL_KEYDOWN:
+            if event.key == SDLK_ESCAPE:
+                running = False
+            elif event.key in (SDLK_LEFT, SDLK_RIGHT):
+                held_keys.add(event.key)
+        elif event.type == SDL_KEYUP:
+            held_keys.discard(event.key)
 
 def main():
     global running
@@ -173,6 +178,10 @@ def main():
         idle_player = AnimationPlayer(
             FRAME_SEQUENCES["idle"], FRAME_INTERVALS["idle"], loop=True
         )
+        walk_player = AnimationPlayer(
+            FRAME_SEQUENCES["walk"], FRAME_INTERVALS["walk"], loop=True
+        )
+        x = CANVAS_WIDTH / 2
         running = True
         previous_time = time.perf_counter()
         while running:
@@ -180,13 +189,16 @@ def main():
             delta_time = current_time - previous_time
             previous_time = current_time
             handle_events()
-            idle_player.update(delta_time)
+            direction = -1 if SDLK_LEFT in held_keys else (1 if SDLK_RIGHT in held_keys else 0)
+            if direction:
+                walk_player.update(delta_time)
+                x += direction * WALK_SPEED * delta_time
+                current_player = walk_player
+            else:
+                idle_player.update(delta_time)
+                current_player = idle_player
             clear_canvas()
-            draw_frame(
-                sprite_sheet,
-                idle_player.frame,
-                CANVAS_WIDTH / 2,
-            )
+            draw_frame(sprite_sheet, current_player.frame, x)
             update_canvas()
             delay(1.0 / TARGET_FPS)
     finally:
