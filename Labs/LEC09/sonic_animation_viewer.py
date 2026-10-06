@@ -192,6 +192,13 @@ def main():
         run_player = AnimationPlayer(
             FRAME_SEQUENCES["run"], FRAME_INTERVALS["run"], loop=True
         )
+        roll_player = AnimationPlayer(
+            FRAME_SEQUENCES["roll"], FRAME_INTERVALS["roll"], loop=True
+        )
+        roll_start_player = None
+        mode = "idle"
+        run_held_time = 0.0
+        run_direction = 0
         x = CANVAS_WIDTH / 2
         facing_left = False
         running = True
@@ -208,18 +215,53 @@ def main():
                 facing_left = direction < 0
             shift_down = SDLK_LSHIFT in held_keys or SDLK_RSHIFT in held_keys
             if direction and shift_down:
-                run_player.update(delta_time)
-                x += direction * RUN_SPEED * delta_time
-                current_player = run_player
-            elif direction:
-                walk_player.update(delta_time)
-                x += direction * WALK_SPEED * delta_time
-                current_player = walk_player
+                if run_direction != direction:
+                    run_held_time = 0.0
+                    run_direction = direction
+                    mode = "run"
+                if mode not in ("roll_start", "roll"):
+                    run_held_time += delta_time
+                    if run_held_time >= ROLL_HOLD_SECONDS:
+                        mode = "roll_start"
+                        roll_start_player = AnimationPlayer(
+                            FRAME_SEQUENCES["roll_start"],
+                            FRAME_INTERVALS["roll_start"],
+                            loop=False,
+                        )
+                if mode == "roll_start":
+                    roll_start_player.update(delta_time)
+                    current_player = roll_start_player
+                    x += direction * ROLL_SPEED * delta_time
+                    if roll_start_player.finished:
+                        mode = "roll"
+                elif mode == "roll":
+                    roll_player.update(delta_time)
+                    current_player = roll_player
+                    x += direction * ROLL_SPEED * delta_time
+                else:
+                    mode = "run"
+                    run_player.update(delta_time)
+                    current_player = run_player
+                    x += direction * RUN_SPEED * delta_time
             else:
-                idle_player.update(delta_time)
-                current_player = idle_player
+                run_held_time = 0.0
+                run_direction = 0
+                if direction:
+                    mode = "walk"
+                    walk_player.update(delta_time)
+                    current_player = walk_player
+                    x += direction * WALK_SPEED * delta_time
+                else:
+                    mode = "idle"
+                    idle_player.update(delta_time)
+                    current_player = idle_player
             clear_canvas()
-            draw_frame(sprite_sheet, current_player.frame, x, facing_left=facing_left)
+            draw_frame(
+                sprite_sheet,
+                current_player.frame,
+                x,
+                facing_left=facing_left,
+            )
             update_canvas()
             delay(1.0 / TARGET_FPS)
     finally:
