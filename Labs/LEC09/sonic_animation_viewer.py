@@ -159,6 +159,17 @@ def draw_frame(image, frame, x, vertical_offset=0.0, facing_left=False):
     )
 
 
+
+def clamp_view_position(x, vertical_offset, frame):
+    """확대된 프레임 경계가 창 바깥으로 나가지 않도록 위치를 제한한다."""
+    draw_width = frame.width * SPRITE_SCALE
+    draw_height = frame.height * SPRITE_SCALE
+    half_width = draw_width / 2
+    x = min(max(x, half_width), CANVAS_WIDTH - half_width)
+    max_vertical_offset = max(0.0, CANVAS_HEIGHT - GROUND_Y - draw_height)
+    vertical_offset = min(max(vertical_offset, 0.0), max_vertical_offset)
+    return x, vertical_offset
+
 def handle_events():
     """종료, 방향키, Shift와 점프 입력의 눌림 상태를 추적한다."""
     global running, jump_pressed
@@ -349,6 +360,7 @@ def main():
                         current_player = enter_mode("idle")
                         current_player.update(delta_time)
 
+            x, jump_offset = clamp_view_position(x, jump_offset, current_player.frame)
             clear_canvas()
             draw_frame(
                 sprite_sheet,
