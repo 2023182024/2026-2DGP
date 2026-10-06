@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+import time
 
 try:
     from pico2d import *
@@ -169,17 +170,28 @@ def main():
         open_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas_open = True
         sprite_sheet = load_sprite_sheet()
+        idle_player = AnimationPlayer(
+            FRAME_SEQUENCES["idle"], FRAME_INTERVALS["idle"], loop=True
+        )
         running = True
+        previous_time = time.perf_counter()
         while running:
+            current_time = time.perf_counter()
+            delta_time = current_time - previous_time
+            previous_time = current_time
             handle_events()
+            idle_player.update(delta_time)
             clear_canvas()
-            draw_frame(sprite_sheet, FRAME_SEQUENCES["idle"][0], CANVAS_WIDTH / 2)
+            draw_frame(
+                sprite_sheet,
+                idle_player.frame,
+                CANVAS_WIDTH / 2,
+            )
             update_canvas()
             delay(1.0 / TARGET_FPS)
     finally:
         if canvas_open:
             close_canvas()
-
 
 if __name__ == "__main__":
     main()
