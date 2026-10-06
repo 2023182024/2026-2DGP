@@ -166,9 +166,11 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE:
                 running = False
-            elif event.key in (SDLK_LEFT, SDLK_RIGHT) and event.key not in held_keys:
-                held_keys.add(event.key)
-                horizontal_key_order.append(event.key)
+            elif event.key in (SDLK_LEFT, SDLK_RIGHT, SDLK_LSHIFT, SDLK_RSHIFT):
+                if event.key not in held_keys:
+                    held_keys.add(event.key)
+                    if event.key in (SDLK_LEFT, SDLK_RIGHT):
+                        horizontal_key_order.append(event.key)
         elif event.type == SDL_KEYUP:
             held_keys.discard(event.key)
             if event.key in horizontal_key_order:
@@ -187,6 +189,9 @@ def main():
         walk_player = AnimationPlayer(
             FRAME_SEQUENCES["walk"], FRAME_INTERVALS["walk"], loop=True
         )
+        run_player = AnimationPlayer(
+            FRAME_SEQUENCES["run"], FRAME_INTERVALS["run"], loop=True
+        )
         x = CANVAS_WIDTH / 2
         facing_left = False
         running = True
@@ -201,7 +206,12 @@ def main():
                 direction = -1 if horizontal_key_order[-1] == SDLK_LEFT else 1
             if direction:
                 facing_left = direction < 0
-            if direction:
+            shift_down = SDLK_LSHIFT in held_keys or SDLK_RSHIFT in held_keys
+            if direction and shift_down:
+                run_player.update(delta_time)
+                x += direction * RUN_SPEED * delta_time
+                current_player = run_player
+            elif direction:
                 walk_player.update(delta_time)
                 x += direction * WALK_SPEED * delta_time
                 current_player = walk_player
