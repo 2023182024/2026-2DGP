@@ -1,5 +1,6 @@
 """키보드로 Sonic 스프라이트 애니메이션을 확인하는 뷰어."""
 
+from dataclasses import dataclass
 from pathlib import Path
 
 try:
@@ -11,6 +12,74 @@ CANVAS_WIDTH = 1200
 CANVAS_HEIGHT = 600
 TARGET_FPS = 60
 ASSET_PATH = Path(__file__).resolve().with_name("sonic-sprite.png")
+SHEET_WIDTH = 399
+SHEET_HEIGHT = 525
+
+SPRITE_SCALE = 8.0
+WALK_SPEED = 180.0
+RUN_SPEED = 360.0
+ROLL_SPEED = 420.0
+ROLL_HOLD_SECONDS = 1.0
+JUMP_DURATION = 0.72
+JUMP_HEIGHT = 150.0
+FRAME_INTERVALS = {
+    "idle": 0.16,
+    "walk": 0.08,
+    "run": 0.06,
+    "roll_start": 0.07,
+    "roll": 0.07,
+    "brake": 0.05,
+    "jump": 0.08,
+}
+
+
+@dataclass(frozen=True)
+class FrameRect:
+    """PNG 왼쪽 위 원점을 기준으로 한 프레임 사각형."""
+
+    x: int
+    y: int
+    width: int
+    height: int
+
+    def pico2d_y(self, sheet_height=SHEET_HEIGHT):
+        return sheet_height - self.y - self.height
+
+
+FRAME_SEQUENCES = {
+    "idle": (
+        FrameRect(1, 39, 29, 39), FrameRect(31, 40, 26, 38),
+        FrameRect(58, 39, 28, 39), FrameRect(86, 40, 30, 38),
+        FrameRect(118, 40, 30, 38), FrameRect(150, 40, 30, 38),
+        FrameRect(182, 40, 29, 38),
+    ),
+    "walk": (
+        FrameRect(8, 80, 26, 37), FrameRect(37, 80, 27, 37),
+        FrameRect(65, 80, 31, 38), FrameRect(97, 80, 37, 37),
+        FrameRect(135, 80, 32, 35), FrameRect(170, 79, 32, 38),
+        FrameRect(206, 79, 26, 38), FrameRect(238, 80, 24, 37),
+        FrameRect(263, 80, 30, 37), FrameRect(295, 80, 36, 37),
+        FrameRect(334, 80, 32, 36), FrameRect(370, 79, 29, 38),
+    ),
+    "run": (
+        FrameRect(1, 124, 33, 40), FrameRect(39, 124, 35, 39),
+        FrameRect(89, 125, 35, 38), FrameRect(130, 121, 34, 42),
+        FrameRect(181, 122, 34, 41), FrameRect(228, 122, 33, 40),
+    ),
+    "roll_start": (
+        FrameRect(1, 169, 29, 30), FrameRect(35, 167, 29, 31),
+        FrameRect(67, 169, 30, 29), FrameRect(98, 169, 31, 29),
+        FrameRect(131, 168, 29, 30), FrameRect(162, 168, 29, 31),
+        FrameRect(193, 170, 30, 29), FrameRect(230, 170, 31, 29),
+        FrameRect(268, 170, 30, 30),
+    ),
+    "roll": (
+        FrameRect(1, 206, 30, 27), FrameRect(36, 206, 29, 27),
+        FrameRect(70, 206, 29, 27), FrameRect(105, 206, 29, 27),
+        FrameRect(139, 206, 29, 27), FrameRect(174, 206, 29, 27),
+    ),
+}
+FRAME_SEQUENCES["jump"] = FRAME_SEQUENCES["roll"]
 
 running = True
 
