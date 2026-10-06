@@ -82,6 +82,40 @@ FRAME_SEQUENCES = {
 }
 FRAME_SEQUENCES["jump"] = FRAME_SEQUENCES["roll"]
 
+class AnimationPlayer:
+    """동작 프레임을 지정한 시간 간격으로 순환 또는 일회 재생한다."""
+
+    def __init__(self, frames, frame_interval, loop=True):
+        if not frames:
+            raise ValueError("애니메이션 프레임은 한 개 이상이어야 합니다.")
+        if frame_interval <= 0:
+            raise ValueError("프레임 간격은 0보다 커야 합니다.")
+        self.frames = tuple(frames)
+        self.frame_interval = frame_interval
+        self.loop = loop
+        self.index = 0
+        self.elapsed = 0.0
+        self.finished = False
+
+    @property
+    def frame(self):
+        return self.frames[self.index]
+
+    def update(self, delta_time):
+        if self.finished:
+            return
+        self.elapsed += max(0.0, delta_time)
+        while self.elapsed >= self.frame_interval:
+            self.elapsed -= self.frame_interval
+            if self.index + 1 < len(self.frames):
+                self.index += 1
+            elif self.loop:
+                self.index = 0
+            else:
+                self.elapsed = 0.0
+                self.finished = True
+                return
+
 running = True
 
 
