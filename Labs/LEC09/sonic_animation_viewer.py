@@ -120,6 +120,7 @@ class AnimationPlayer:
 running = True
 held_keys = set()
 horizontal_key_order = []
+pressed_direction_keys = []
 
 
 def load_sprite_sheet():
@@ -157,8 +158,9 @@ def draw_frame(image, frame, x, vertical_offset=0.0, facing_left=False):
 
 
 def handle_events():
-    """종료 입력과 마지막으로 눌린 수평 방향키를 추적한다."""
+    """종료 입력과 방향키의 눌림·해제 및 신규 입력을 추적한다."""
     global running
+    pressed_direction_keys.clear()
 
     for event in get_events():
         if event.type == SDL_QUIT:
@@ -171,6 +173,7 @@ def handle_events():
                     held_keys.add(event.key)
                     if event.key in (SDLK_LEFT, SDLK_RIGHT):
                         horizontal_key_order.append(event.key)
+                        pressed_direction_keys.append(event.key)
         elif event.type == SDL_KEYUP:
             held_keys.discard(event.key)
             if event.key in horizontal_key_order:
@@ -196,6 +199,9 @@ def main():
             FRAME_SEQUENCES["roll"], FRAME_INTERVALS["roll"], loop=True
         )
         roll_start_player = None
+        brake_player = None
+        brake_old_direction = 0
+        brake_target_direction = 0
         mode = "idle"
         run_held_time = 0.0
         run_direction = 0
@@ -214,7 +220,39 @@ def main():
             if direction:
                 facing_left = direction < 0
             shift_down = SDLK_LSHIFT in held_keys or SDLK_RSHIFT in held_keys
-            if direction and shift_down:
+            reverse_pressed = any(
+                (key == SDLK_LEFT and direction == -1)
+                or (key == SDLK_RIGHT and direction == 1)
+                for key in pressed_direction_keys
+            )
+            if (
+                mode == "run"
+                and shift_down
+                and direction == -run_direction
+                and reverse_pressed
+            ):
+                brake_old_direction = run_direction
+                brake_target_direction = direction
+                brake_player = AnimationPlayer(
+                    tuple(reversed(FRAME_SEQUENCES["run"]))
+                    + FRAME_SEQUENCES["run"][:3],
+                    FRAME_INTERVALS["brake"],
+                    loop=False,
+                )
+                run_held_time = 0.0
+                mode = "brake"
+            if mode == "brake":
+                brake_player.update(delta_time)
+                current_player = brake_player
+                if brake_player.index < len(FRAME_SEQUENCES["run"]):
+                    facing_left = brake_old_direction < 0
+                else:
+                    facing_left = brake_target_direction < 0
+                if brake_player.finished:
+                    mode = "run"
+                    run_direction = brake_target_direction
+                    run_held_time = 0.0
+            elif direction and shift_down:
                 if run_direction != direction:
                     run_held_time = 0.0
                     run_direction = direction
