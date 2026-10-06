@@ -191,31 +191,52 @@ def main():
         open_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas_open = True
         sprite_sheet = load_sprite_sheet()
-        idle_player = AnimationPlayer(
-            FRAME_SEQUENCES["idle"], FRAME_INTERVALS["idle"], loop=True
-        )
-        walk_player = AnimationPlayer(
-            FRAME_SEQUENCES["walk"], FRAME_INTERVALS["walk"], loop=True
-        )
-        run_player = AnimationPlayer(
-            FRAME_SEQUENCES["run"], FRAME_INTERVALS["run"], loop=True
-        )
-        roll_player = AnimationPlayer(
-            FRAME_SEQUENCES["roll"], FRAME_INTERVALS["roll"], loop=True
-        )
-        roll_start_player = None
-        brake_player = None
-        jump_player = None
+        players = {
+            "idle": AnimationPlayer(
+                FRAME_SEQUENCES["idle"], FRAME_INTERVALS["idle"], loop=True
+            ),
+            "walk": AnimationPlayer(
+                FRAME_SEQUENCES["walk"], FRAME_INTERVALS["walk"], loop=True
+            ),
+            "run": AnimationPlayer(
+                FRAME_SEQUENCES["run"], FRAME_INTERVALS["run"], loop=True
+            ),
+            "roll_start": AnimationPlayer(
+                FRAME_SEQUENCES["roll_start"],
+                FRAME_INTERVALS["roll_start"],
+                loop=False,
+            ),
+            "roll": AnimationPlayer(
+                FRAME_SEQUENCES["roll"], FRAME_INTERVALS["roll"], loop=True
+            ),
+            "brake": AnimationPlayer(
+                tuple(reversed(FRAME_SEQUENCES["run"]))
+                + FRAME_SEQUENCES["run"][:3],
+                FRAME_INTERVALS["brake"],
+                loop=False,
+            ),
+            "jump": AnimationPlayer(
+                FRAME_SEQUENCES["jump"], FRAME_INTERVALS["jump"], loop=True
+            ),
+        }
+        mode = "idle"
+        run_held_time = 0.0
+        run_direction = 0
         jump_elapsed = 0.0
         jump_offset = 0.0
         brake_old_direction = 0
         brake_target_direction = 0
-        mode = "idle"
-        run_held_time = 0.0
-        run_direction = 0
         x = CANVAS_WIDTH / 2
         facing_left = False
         running = True
+
+        def enter_mode(next_mode):
+            nonlocal mode
+            if mode != next_mode:
+                mode = next_mode
+                players[mode].reset()
+            return players[mode]
+
         previous_time = time.perf_counter()
         while running:
             current_time = time.perf_counter()
@@ -228,21 +249,29 @@ def main():
             if direction:
                 facing_left = direction < 0
             shift_down = SDLK_LSHIFT in held_keys or SDLK_RSHIFT in held_keys
+            jump_offset = 0.0
+
             if jump_pressed and mode != "jump":
-                jump_player = AnimationPlayer(
-                    FRAME_SEQUENCES["jump"], FRAME_INTERVALS["jump"], loop=True
-                )
+                enter_mode("jump")
                 jump_elapsed = 0.0
-                mode = "jump"
+
             if mode == "jump":
-                jump_player.update(delta_time)
+                if direction and shift_down:
+                    if run_direction != direction:
+                        run_held_time = 0.0
+                        run_direction = direction
+                    run_held_time += delta_time
+                else:
+                    run_held_time = 0.0
+                    run_direction = 0
                 jump_elapsed = min(JUMP_DURATION, jump_elapsed + delta_time)
                 jump_progress = jump_elapsed / JUMP_DURATION
                 jump_offset = 4 * JUMP_HEIGHT * jump_progress * (1 - jump_progress)
                 if direction:
                     air_speed = RUN_SPEED if shift_down else WALK_SPEED
                     x += direction * air_speed * delta_time
-                current_player = jump_player
+                current_player = players["jump"]
+                current_player.update(delta_time)
                 if jump_elapsed >= JUMP_DURATION:
                     jump_offset = 0.0
                     mode = "jump_done"
@@ -260,66 +289,53 @@ def main():
                 ):
                     brake_old_direction = run_direction
                     brake_target_direction = direction
-                    brake_player = AnimationPlayer(
-                        tuple(reversed(FRAME_SEQUENCES["run"]))
-                        + FRAME_SEQUENCES["run"][:3],
-                        FRAME_INTERVALS["brake"],
-                        loop=False,
-                    )
                     run_held_time = 0.0
-                    mode = "brake"
+                    enter_mode("brake")
                 if mode == "brake":
-                    brake_player.update(delta_time)
-                    current_player = brake_player
-                    if brake_player.index < len(FRAME_SEQUENCES["run"]):
+                    current_player = players["brake"]
+                    current_player.update(delta_time)
+                    if current_player.index < len(FRAME_SEQUENCES["run"]):
                         facing_left = brake_old_direction < 0
                     else:
                         facing_left = brake_target_direction < 0
-                    if brake_player.finished:
-                        mode = "run"
+                    if current_player.finished:
+                        enter_mode("run")
                         run_direction = brake_target_direction
                         run_held_time = 0.0
                 elif direction and shift_down:
                     if run_direction != direction:
                         run_held_time = 0.0
                         run_direction = direction
-                        mode = "run"
+                        enter_mode("run")
                     if mode not in ("roll_start", "roll"):
                         run_held_time += delta_time
                         if run_held_time >= ROLL_HOLD_SECONDS:
-                            mode = "roll_start"
-                            roll_start_player = AnimationPlayer(
-                                FRAME_SEQUENCES["roll_start"],
-                                FRAME_INTERVALS["roll_start"],
-                                loop=False,
-                            )
+                            enter_mode("roll_start")
                     if mode == "roll_start":
-                        roll_start_player.update(delta_time)
-                        current_player = roll_start_player
+                        current_player = players["roll_start"]
+                        current_player.update(delta_time)
                         x += direction * ROLL_SPEED * delta_time
-                        if roll_start_player.finished:
-                            mode = "roll"
+                        if current_player.finished:
+                            enter_mode("roll")
                     elif mode == "roll":
-                        roll_player.update(delta_time)
-                        current_player = roll_player
+                        current_player = players["roll"]
+                        current_player.update(delta_time)
                         x += direction * ROLL_SPEED * delta_time
                     else:
-                        mode = "run"
-                        run_player.update(delta_time)
-                        current_player = run_player
+                        current_player = enter_mode("run")
+                        current_player.update(delta_time)
                         x += direction * RUN_SPEED * delta_time
                 else:
                     run_held_time = 0.0
                     run_direction = 0
                     if direction:
-                        mode = "walk"
-                        walk_player.update(delta_time)
-                        current_player = walk_player
+                        current_player = enter_mode("walk")
+                        current_player.update(delta_time)
                         x += direction * WALK_SPEED * delta_time
                     else:
-                        mode = "idle"
-                        idle_player.update(delta_time)
-                        current_player = idle_player
+                        current_player = enter_mode("idle")
+                        current_player.update(delta_time)
+
             clear_canvas()
             draw_frame(
                 sprite_sheet,
