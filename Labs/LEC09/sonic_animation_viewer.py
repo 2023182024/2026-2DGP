@@ -83,6 +83,11 @@ FRAME_SEQUENCES = {
     ),
 }
 FRAME_SEQUENCES["jump"] = FRAME_SEQUENCES["roll"]
+MAX_FRAME_WIDTH = max(
+    frame.width
+    for sequence in FRAME_SEQUENCES.values()
+    for frame in sequence
+)
 
 class AnimationPlayer:
     """동작 프레임을 지정한 시간 간격으로 순환 또는 일회 재생한다."""
@@ -95,6 +100,11 @@ class AnimationPlayer:
         self.frames = tuple(frames)
         self.frame_interval = frame_interval
         self.loop = loop
+        self.index = 0
+        self.elapsed = 0.0
+        self.finished = False
+
+    def reset(self):
         self.index = 0
         self.elapsed = 0.0
         self.finished = False
@@ -164,7 +174,7 @@ def clamp_view_position(x, vertical_offset, frame):
     """확대된 프레임 경계가 창 바깥으로 나가지 않도록 위치를 제한한다."""
     draw_width = frame.width * SPRITE_SCALE
     draw_height = frame.height * SPRITE_SCALE
-    half_width = draw_width / 2
+    half_width = MAX_FRAME_WIDTH * SPRITE_SCALE / 2
     x = min(max(x, half_width), CANVAS_WIDTH - half_width)
     max_vertical_offset = max(0.0, CANVAS_HEIGHT - GROUND_Y - draw_height)
     vertical_offset = min(max(vertical_offset, 0.0), max_vertical_offset)
