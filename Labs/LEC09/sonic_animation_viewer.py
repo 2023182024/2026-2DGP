@@ -197,6 +197,13 @@ def handle_events():
                 horizontal_key_order.remove(event.key)
 
 
+
+def print_controls():
+    """콘솔에 창 크기와 키 조작 방법을 한 번 안내한다."""
+    print("Sonic 애니메이션 뷰어 (1200 x 600)")
+    print("방향키: 걷기 | 방향키 + Shift: 달리기")
+    print("방향키 + Shift 1초 유지: 구르기 | Space: 점프 | Esc: 종료")
+
 def current_direction():
     """동시에 누른 방향키 중 마지막으로 누른 방향을 반환한다."""
     if not horizontal_key_order:
@@ -214,6 +221,7 @@ def main():
         open_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas_open = True
         sprite_sheet = load_sprite_sheet()
+        print_controls()
         players = {
             "idle": AnimationPlayer(
                 FRAME_SEQUENCES["idle"], FRAME_INTERVALS["idle"], loop=True
