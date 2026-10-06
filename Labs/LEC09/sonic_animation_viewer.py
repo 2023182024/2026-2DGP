@@ -16,6 +16,7 @@ SHEET_WIDTH = 399
 SHEET_HEIGHT = 525
 
 SPRITE_SCALE = 8.0
+GROUND_Y = 80.0
 WALK_SPEED = 180.0
 RUN_SPEED = 360.0
 ROLL_SPEED = 420.0
@@ -99,6 +100,23 @@ def load_sprite_sheet():
     return image
 
 
+def draw_frame(image, frame, x, vertical_offset=0.0):
+    """프레임을 확대하고 발 기준선에 맞춰 그린다."""
+    draw_width = frame.width * SPRITE_SCALE
+    draw_height = frame.height * SPRITE_SCALE
+    draw_y = GROUND_Y + vertical_offset + draw_height / 2
+    image.clip_draw(
+        frame.x,
+        frame.pico2d_y(),
+        frame.width,
+        frame.height,
+        x,
+        draw_y,
+        draw_width,
+        draw_height,
+    )
+
+
 def handle_events():
     """창 닫기와 Esc 종료 입력을 처리한다."""
     global running
@@ -121,6 +139,7 @@ def main():
         while running:
             handle_events()
             clear_canvas()
+            draw_frame(sprite_sheet, FRAME_SEQUENCES["idle"][0], CANVAS_WIDTH / 2)
             update_canvas()
             delay(1.0 / TARGET_FPS)
     finally:
