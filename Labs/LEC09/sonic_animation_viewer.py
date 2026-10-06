@@ -119,6 +119,7 @@ class AnimationPlayer:
 
 running = True
 held_keys = set()
+horizontal_key_order = []
 
 
 def load_sprite_sheet():
@@ -136,9 +137,11 @@ def load_sprite_sheet():
     return image
 
 
-def draw_frame(image, frame, x, vertical_offset=0.0):
+def draw_frame(image, frame, x, vertical_offset=0.0, facing_left=False):
     """프레임을 확대하고 발 기준선에 맞춰 그린다."""
     draw_width = frame.width * SPRITE_SCALE
+    if facing_left:
+        draw_width = -draw_width
     draw_height = frame.height * SPRITE_SCALE
     draw_y = GROUND_Y + vertical_offset + draw_height / 2
     image.clip_draw(
@@ -154,7 +157,7 @@ def draw_frame(image, frame, x, vertical_offset=0.0):
 
 
 def handle_events():
-    """창 닫기, 종료 키와 좌우 방향키 상태를 처리한다."""
+    """종료 입력과 마지막으로 눌린 수평 방향키를 추적한다."""
     global running
 
     for event in get_events():
@@ -163,10 +166,13 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE:
                 running = False
-            elif event.key in (SDLK_LEFT, SDLK_RIGHT):
+            elif event.key in (SDLK_LEFT, SDLK_RIGHT) and event.key not in held_keys:
                 held_keys.add(event.key)
+                horizontal_key_order.append(event.key)
         elif event.type == SDL_KEYUP:
             held_keys.discard(event.key)
+            if event.key in horizontal_key_order:
+                horizontal_key_order.remove(event.key)
 
 def main():
     global running
@@ -182,6 +188,7 @@ def main():
             FRAME_SEQUENCES["walk"], FRAME_INTERVALS["walk"], loop=True
         )
         x = CANVAS_WIDTH / 2
+        facing_left = False
         running = True
         previous_time = time.perf_counter()
         while running:
@@ -189,7 +196,11 @@ def main():
             delta_time = current_time - previous_time
             previous_time = current_time
             handle_events()
-            direction = -1 if SDLK_LEFT in held_keys else (1 if SDLK_RIGHT in held_keys else 0)
+            direction = 0
+            if horizontal_key_order:
+                direction = -1 if horizontal_key_order[-1] == SDLK_LEFT else 1
+            if direction:
+                facing_left = direction < 0
             if direction:
                 walk_player.update(delta_time)
                 x += direction * WALK_SPEED * delta_time
@@ -198,7 +209,7 @@ def main():
                 idle_player.update(delta_time)
                 current_player = idle_player
             clear_canvas()
-            draw_frame(sprite_sheet, current_player.frame, x)
+            draw_frame(sprite_sheet, current_player.frame, x, facing_left=facing_left)
             update_canvas()
             delay(1.0 / TARGET_FPS)
     finally:
