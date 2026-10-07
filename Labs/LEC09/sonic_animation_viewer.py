@@ -191,22 +191,33 @@ def load_sprite_sheet():
 def draw_frame(image, frame, x, vertical_offset=0.0, facing_left=False):
     """프레임을 확대하고 발 기준선에 맞춰 그린다."""
     draw_width = frame.width * SPRITE_SCALE
-    if facing_left:
-        draw_width = -draw_width
     draw_height = frame.height * SPRITE_SCALE
     draw_y = GROUND_Y + vertical_offset + draw_height / 2
-    image.clip_draw(
-        frame.x,
-        frame.pico2d_y(),
-        frame.width,
-        frame.height,
-        x,
-        draw_y,
-        draw_width,
-        draw_height,
-    )
 
-
+    if facing_left:
+        image.clip_composite_draw(
+            frame.x,
+            frame.pico2d_y(),
+            frame.width,
+            frame.height,
+            0,
+            "h",
+            x,
+            draw_y,
+            draw_width,
+            draw_height,
+        )
+    else:
+        image.clip_draw(
+            frame.x,
+            frame.pico2d_y(),
+            frame.width,
+            frame.height,
+            x,
+            draw_y,
+            draw_width,
+            draw_height,
+        )
 
 def clamp_view_position(x, vertical_offset, frame):
     """확대된 프레임 경계가 창 바깥으로 나가지 않도록 위치를 제한한다."""
