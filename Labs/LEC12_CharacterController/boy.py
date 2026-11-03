@@ -3,6 +3,11 @@ from transitions import Machine
 import time
 
 class Boy:
+    SCREEN_WIDTH = 800
+    SPRITE_WIDTH = 100
+    MIN_X = SPRITE_WIDTH // 2
+    MAX_X = SCREEN_WIDTH - SPRITE_WIDTH // 2
+
     states = ['IDLE', 'WALK', 'RUN', 'SLEEP']
 
     def __init__(self):
@@ -67,21 +72,15 @@ class Boy:
             self.stop_moving()
 
     def update(self):
-        if(self.x>20 or self.x<780):
-            if self.state == 'WALK':
-                if self.face_dir==2:
-                    self.x-=5
-                else:
-                    self.x += 5
-            elif self.state == 'RUN':
-                if self.face_dir==2:
-                    self.x-=15
-                else:    
-                    self.x += 15
+        if self.state == 'WALK':
+            self.x += -5 if self.face_dir == 2 else 5
+        elif self.state == 'RUN':
+            self.x += -15 if self.face_dir == 2 else 15
 
+        self.x = min(max(self.x, self.MIN_X), self.MAX_X)
 
         self.frame = (self.frame + 1) % 8
-        if self.state == 'IDLE' and time.monotonic() - self.last_control_time >= 60:
+        if self.state == 'IDLE' and time.monotonic() - self.last_control_time >= 6:
             self.fall_asleep()
 
     def draw(self):
@@ -90,15 +89,15 @@ class Boy:
             if self.face_dir == 2:
                 self.cursor=0
             else:
-                self.cursor=100
+                self.cursor=1
 
         else:
             if self.face_dir == 2:
-                self.cursor=200
+                self.cursor=2
             else:
-                self.cursor=300
+                self.cursor=3
 
         if self.state=='SLEEP':
-            self.image.clip_composite_draw(self.frame * 100,self.cursor, 100, 100,math.radians(90),'', self.x, self.y-20,100,100)
+            self.image.clip_composite_draw(self.frame * 100,self.cursor*100, 100, 100,math.radians(90),'', self.x, self.y-20,100,100)
         else:
-            self.image.clip_draw(self.frame * 100,self.cursor, 100, 100, self.x, self.y)
+            self.image.clip_draw(self.frame * 100,self.cursor*100, 100, 100, self.x, self.y)
