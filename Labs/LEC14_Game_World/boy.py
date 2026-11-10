@@ -5,6 +5,9 @@ from sdl2 import (SDL_KEYDOWN, SDL_KEYUP, SDLK_LEFT, SDLK_RIGHT,
                   SDLK_SPACE)
 from transitions import Machine
 
+import game_world
+from ball import Ball
+
 
 class Boy:
     def __init__(self):
@@ -15,10 +18,11 @@ class Boy:
         self.dir = 0
         self.face_dir = 1
         self.pressed_keys = set()
+        self.fire_return_state = 'IDLE'
 
         self.machine = Machine(
             model=self,
-            states=['IDLE', 'SLEEP', 'RUN'],
+            states=['IDLE', 'SLEEP', 'RUN', 'FIRE'],
             transitions=[
                 {'trigger': 'fall_asleep',
                  'source': 'IDLE', 'dest': 'SLEEP'},
@@ -28,6 +32,13 @@ class Boy:
                  'source': ['IDLE', 'SLEEP'], 'dest': 'RUN'},
                 {'trigger': 'stop_run',
                  'source': 'RUN', 'dest': 'IDLE'},
+                {'trigger': 'fire',
+                 'source': ['IDLE', 'RUN'], 'dest': 'FIRE',
+                 'before': 'remember_fire_return'},
+                {'trigger': 'finish_fire',
+                 'source': 'FIRE', 'dest': 'IDLE'},
+                {'trigger': 'finish_fire_run',
+                 'source': 'FIRE', 'dest': 'RUN'},
             ],
             initial='IDLE',
             auto_transitions=False,
@@ -43,7 +54,26 @@ class Boy:
     def on_enter_RUN(self):
         self.frame = 0
 
+    def remember_fire_return(self):
+        self.fire_return_state = self.state
+
+    def on_enter_FIRE(self):
+        ball_x = self.x + self.face_dir * 35
+        ball_y = self.y + 10
+        game_world.add_object(Ball(ball_x, ball_y, self.face_dir), 1)
+
+        if self.fire_return_state == 'RUN':
+            self.finish_fire_run()
+        else:
+            self.finish_fire()
+
     def handle_event(self, event):
+        if (event.type == SDL_KEYDOWN and
+                event.key == SDLK_SPACE and
+                self.state in ('IDLE', 'RUN')):
+            self.fire()
+            return
+
         if (event.type == SDL_KEYDOWN and
                 event.key == SDLK_SPACE and
                 self.state == 'SLEEP'):

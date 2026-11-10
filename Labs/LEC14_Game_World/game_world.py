@@ -1,18 +1,11 @@
-world = [[], []] # layers for game objects
 
-def add_object(o, depth):
+world = [[],[]]
+
+def add_object(o,depth):
     world[depth].append(o)
 
-def add_objects(ol, depth):
-    world[depth] += ol
-
-def remove_object(o):
-    for layer in world:
-        if o in layer:
-            layer.remove(o)
-            return
-
-    raise Exception("Object not found")
+def add_objests(ol,depth):
+    world[depth]+=ol
 
 
 def update():
@@ -25,4 +18,8 @@ def render():
         for o in layer:
             o.draw()
 
-
+def remove(o):
+    for layer in world:
+        if o in layer:
+            layer.remove(o)
+            return
