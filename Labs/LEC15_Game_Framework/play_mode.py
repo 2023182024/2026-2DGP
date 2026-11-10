@@ -20,6 +20,10 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_p:
             paused = not paused
+            if paused:
+                boy.pause()
+            else:
+                boy.resume()
         elif paused:
             continue
         else:

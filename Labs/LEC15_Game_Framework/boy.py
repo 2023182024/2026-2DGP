@@ -15,6 +15,7 @@ class Boy:
         self.frame = 0
         self.image = load_image('animation_sheet.png')
         self.idle_started_at = get_time()
+        self.paused_at = None
         self.dir = 0
         self.face_dir = 1
         self.pressed_keys = set()
@@ -35,6 +36,17 @@ class Boy:
             initial='IDLE',
             auto_transitions=False,
         )
+
+    def pause(self):
+        self.paused_at = get_time()
+        self.pressed_keys.clear()
+        self.dir = 0
+
+    def resume(self):
+        if self.paused_at is not None:
+            if self.state == 'IDLE':
+                self.idle_started_at += get_time() - self.paused_at
+            self.paused_at = None
 
     def on_enter_IDLE(self):
         self.idle_started_at = get_time()
