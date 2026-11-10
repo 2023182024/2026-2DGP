@@ -7,10 +7,12 @@ from grass import Grass
 
 paused = False
 pause_font = None
+inventory_open = False
+inventory_image = None
 
 
 def handle_events():
-    global paused
+    global paused, inventory_open
 
     event_list = get_events()
     for event in event_list:
@@ -24,6 +26,14 @@ def handle_events():
                 boy.pause()
             else:
                 boy.resume()
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_i:
+            inventory_open = not inventory_open
+        elif inventory_open and event.type == SDL_KEYDOWN and event.key == SDLK_0:
+            boy.equip_ball(0)
+        elif inventory_open and event.type == SDL_KEYDOWN and event.key == SDLK_1:
+            boy.equip_ball(1)
+        elif inventory_open and event.type == SDL_KEYDOWN and event.key == SDLK_2:
+            boy.equip_ball(2)
         elif paused:
             continue
         else:
@@ -32,10 +42,12 @@ def handle_events():
 
 
 def init():
-    global boy, paused, pause_font
+    global boy, paused, pause_font, inventory_open, inventory_image
 
     paused = False
+    inventory_open = False
     pause_font = load_font('C:/Windows/Fonts/arial.ttf', 36)
+    inventory_image = load_image('item_select.png')
 
     boy = Boy()
     game_world.add_oject(boy)
@@ -56,6 +68,8 @@ def render():
     if paused:
         draw_rectangle(250, 250, 550, 350)
         pause_font.draw(310, 285, 'PAUSED', (255, 255, 255))
+    if inventory_open:
+        inventory_image.draw(400, 300)
     update_canvas()
 
 def finish():

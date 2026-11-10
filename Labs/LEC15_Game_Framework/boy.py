@@ -19,6 +19,7 @@ class Boy:
         self.dir = 0
         self.face_dir = 1
         self.pressed_keys = set()
+        self.equipped_ball = 0
 
         self.machine = Machine(
             model=self,
@@ -59,8 +60,13 @@ class Boy:
         self.frame = 0
 
     def fire_ball(self):
-        ball = Ball(self.x, self.y, self.face_dir * 10)
+        if self.equipped_ball == 0:
+            return
+        ball = Ball(self.x, self.y, self.face_dir * 10, self.equipped_ball)
         game_world.add_oject(ball)
+
+    def equip_ball(self, ball_type):
+        self.equipped_ball = ball_type
 
     def handle_event(self, event):
         if (event.type == SDL_KEYDOWN and
