@@ -182,3 +182,16 @@ class Boy:
     def draw(self):
         self.states[self.state].draw(self)
         self.font.draw(self.x - 10, self.y + 50, f'{self.ball_count:02d}', (255, 255, 0))
+        draw_rectangle(*self.get_bb())
+    def get_bb(self):
+        if self.state == 'RUN':
+            return self.x - 30, self.y - 40, self.x + 30, self.y + 40
+        elif self.state == 'SLEEP':
+            return self.x - 50, self.y - 20, self.x + 50, self.y - 50
+        else:
+            return self.x - 20, self.y - 40, self.x + 20, self.y + 40
+
+    def handle_collision(self, group, other):
+        if group == 'boy:ball':
+            self.ball_count += 1
+            
